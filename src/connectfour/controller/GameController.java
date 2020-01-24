@@ -11,9 +11,12 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 
 /**
  * FXML Controller class
@@ -24,12 +27,17 @@ public class GameController implements Initializable {
 
     private static final int SIZE = 6;
     private static int[][] gridFields = new int[SIZE][SIZE];
-    Player player1 = new Player(1);
-    Player player2 = new Player(2);
+    Player player1 = new Player(1, "Player 1");
+    Player player2 = new Player(2, "Player 2");
     Player currentPlayer;
+    Boolean winner = false;
 
     @FXML
     private GridPane gameGrid;
+    @FXML
+    private Button btnStartNew;
+    @FXML
+    private Text txtDisplay;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -40,6 +48,14 @@ public class GameController implements Initializable {
     private void setupGame() {
         fillInitialGrid();
         currentPlayer = player1;
+        gameGrid.setDisable(false);
+        btnStartNew.setDisable(true);
+        txtDisplay.setText("Next turn: " + currentPlayer.getName());
+
+        if (winner) {
+            winner = false;
+            renderGame();
+        }
     }
 
     private void renderGame() {
@@ -63,7 +79,7 @@ public class GameController implements Initializable {
 
             c.getStyleClass().clear();
 
-            switch (gridFields[GridPane.getRowIndex(node)][GridPane.getColumnIndex(node)]) {
+            switch (gridFields[row][col]) {
                 case 0:
                     style = "neutral";
                     c.getStyleClass().add(style);
@@ -105,14 +121,13 @@ public class GameController implements Initializable {
         } else {
             currentPlayer = player1;
         }
+        txtDisplay.setText("Next turn: " + currentPlayer.getName());
     }
 
     private void addNextToGrid(int nextPlayer, int rowIndex, int colIndex) {
-        //Ako je red napunjen 
-        //if () {
         int lastAddedInColumn = -1;
-        for (int i = 0; i < 6; i++) {
-            if (gridFields[5][colIndex] == 0) {
+        for (int i = 0; i < SIZE; i++) {
+            if (gridFields[SIZE - 1][colIndex] == 0) {
                 lastAddedInColumn = 5;
                 break;
             } else if (gridFields[i][colIndex] == 1 || gridFields[i][colIndex] == 2) {
@@ -125,10 +140,90 @@ public class GameController implements Initializable {
         }
 
         gridFields[lastAddedInColumn][colIndex] = nextPlayer;
+
+        calculateGame(lastAddedInColumn, colIndex, nextPlayer);
+        if (winner) {
+            setWinner();
+        }
         changePlayer();
         renderGame();
-        //}
+    }
 
+    private void calculateGame(int row, int col, int playerCheck) {
+        //Check coll
+        int tempInRow = 0;
+        for (int j = 0; j < SIZE; j++) {
+            if (gridFields[j][col] == playerCheck) {
+                tempInRow++;
+
+            } else {
+                tempInRow = 0;
+            }
+
+            if (tempInRow == 4) {
+                winner = true;
+                break;
+            }
+        }
+
+        //Check row
+        tempInRow = 0;
+        for (int j = 0; j < SIZE; j++) {
+            if (gridFields[row][j] == playerCheck) {
+                tempInRow++;
+
+            } else {
+                tempInRow = 0;
+            }
+
+            if (tempInRow == 4) {
+                winner = true;
+                break;
+            }
+        }
+//            TODO
+//        //Check diagonal hor
+//        tempInRow = 0;
+//        for (int j = 0; j < SIZE; j++) {
+//            if (gridFields[j][col] == playerCheck) {
+//                tempInRow++;
+//
+//            } else {
+//                tempInRow = 0;
+//            }
+//
+//            if (tempInRow == 4) {
+//                winner = true;
+//                break;
+//            }
+//        }
+//
+//        //Check diagonal ver
+//        tempInRow = 0;
+//        for (int j = 0; j < SIZE; j++) {
+//            if (gridFields[j][col] == playerCheck) {
+//                tempInRow++;
+//
+//            } else {
+//                tempInRow = 0;
+//            }
+//
+//            if (tempInRow == 4) {
+//                winner = true;
+//                break;
+//            }
+//        }
+    }
+
+    private void setWinner() {
+        btnStartNew.setDisable(false);
+        txtDisplay.setText("Winner is " + currentPlayer.getName());
+        gameGrid.setDisable(true);
+    }
+
+    @FXML
+    private void onStartNewGame(MouseEvent event) {
+        setupGame();
     }
 
 }

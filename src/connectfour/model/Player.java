@@ -19,8 +19,9 @@ public class Player {
         return playerNumber;
     }
 
-    public Player(int playerNumber) {
+    public Player(int playerNumber, String name) {
         this.playerNumber = playerNumber;
+        this.name = name;
     }
 
     

@@ -86,12 +86,21 @@
                 <Font size="18.0" />
             </font>
         </Text>
-        <Text layoutX="224.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 2" wrappingWidth="76.0">
+        <Text layoutX="200.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 2" wrappingWidth="76.0">
             <font>
                 <Font size="18.0" />
             </font>
         </Text>
         <Circle fill="#fff41f" layoutX="131.0" layoutY="51.0" radius="24.0" stroke="BLACK" strokeType="INSIDE" />
-        <Circle fill="#2193ff" layoutX="324.0" layoutY="51.0" radius="24.0" stroke="BLACK" strokeType="INSIDE" />
+        <Circle fill="#2193ff" layoutX="300.0" layoutY="51.0" radius="24.0" stroke="BLACK" strokeType="INSIDE" />
+      <Button fx:id="btnStartNew" disable="true" layoutX="642.0" layoutY="538.0" mnemonicParsing="false" onMouseClicked="#onStartNewGame" prefHeight="48.0" prefWidth="112.0" text="Start new">
+         <font>
+            <Font size="16.0" />
+         </font></Button>
+      <Text fx:id="txtDisplay" layoutX="524.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="262.0">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
     </children>
 </AnchorPane>
