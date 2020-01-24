@@ -1,0 +1,31 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+
+}
+
+.gameGrid {
+   -fx-border-width:1px;
+   -fx-border-color: grey;
+   -fx-grid-lines-visible: true;
+}
+
+.neutral {
+    -fx-stroke-type: inside;
+    -fx-stroke: #0000005e;
+    -fx-fill: #e8e8e869;
+}
+
+.orange {
+     -fx-stroke-type: inside;
+    -fx-stroke: #0000005e;
+    -fx-fill: #fff41f;
+}
+
+.red {
+      -fx-stroke-type: inside;
+    -fx-stroke: #0000005e;
+    -fx-fill: #2193ff;
+}
