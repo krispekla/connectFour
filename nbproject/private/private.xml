@@ -3,11 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Kris/Documents/NetBeansProjects/ConnectFour/src/connectfour/view/game.css</file>
-            <file>file:/C:/Users/Kris/Documents/NetBeansProjects/ConnectFour/src/connectfour/controller/GameController.java</file>
-            <file>file:/C:/Users/Kris/Documents/NetBeansProjects/ConnectFour/src/connectfour/view/game.fxml</file>
-            <file>file:/C:/Users/Kris/Documents/NetBeansProjects/ConnectFour/src/connectfour/ConnectFour.java</file>
-            <file>file:/C:/Users/Kris/Documents/NetBeansProjects/ConnectFour/src/connectfour/model/Player.java</file>
+            <file>file:/Users/pekla/Projects/connectFour/src/connectfour/controller/GameController.java</file>
+            <file>file:/Users/pekla/Projects/connectFour/src/connectfour/model/Player.java</file>
+            <file>file:/Users/pekla/Projects/connectFour/src/connectfour/ConnectFour.java</file>
+            <file>file:/Users/pekla/Projects/connectFour/src/connectfour/utils/Helper.java</file>
+            <file>file:/Users/pekla/Projects/connectFour/src/connectfour/model/GameState.java</file>
         </group>
     </open-files>
 </project-private>
