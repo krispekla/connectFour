@@ -6,17 +6,14 @@
 package connectfour.controller;
 
 import connectfour.model.GameState;
-import connectfour.model.Player;
 import connectfour.utils.Helper;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -92,9 +89,7 @@ public class GameController implements Initializable {
 
     private void renderGame() {
         for (final Node node : gameGrid.getChildren()) {
-            System.out.println(node);
-
-                        Circle c;
+            Circle c;
             if (node instanceof Circle) {
                 c = (Circle) node;
             } else {
@@ -106,8 +101,6 @@ public class GameController implements Initializable {
             if (row < 0 || row > 5 || col > 5 || col < 0 || node == null) {
                 return;
             }
-
-
 
             String style = "";
 
