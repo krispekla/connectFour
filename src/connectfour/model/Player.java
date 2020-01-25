@@ -5,15 +5,16 @@
  */
 package connectfour.model;
 
+import java.io.Serializable;
 import javafx.scene.paint.Color;
 
 /**
  *
  * @author Kris
  */
-public class Player {
+public class Player implements Serializable{
     
-    private int playerNumber;
+    private  int playerNumber;
 
     public int getPlayerNumber() {
         return playerNumber;
