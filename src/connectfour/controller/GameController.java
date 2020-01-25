@@ -127,6 +127,9 @@ public class GameController implements Initializable {
     @FXML
     private void onNextTurn(MouseEvent e) {
         Node source = e.getPickResult().getIntersectedNode();
+        if (!(source instanceof Circle)) {
+            return;
+        }
         int colIndex = GridPane.getColumnIndex(source);
         int rowIndex = GridPane.getRowIndex(source);
 
