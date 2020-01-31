@@ -8,6 +8,10 @@ package connectfour.controller;
 import connectfour.model.GameState;
 import connectfour.utils.Helper;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,9 +23,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 /**
@@ -32,44 +39,38 @@ import javafx.scene.text.Text;
 public class GameController implements Initializable {
 
     GameState state = new GameState(6, "Player 1", "Player 2");
-
+    ObjectOutputStream os;
+    private Socket sock;
     @FXML
     private GridPane gameGrid;
     @FXML
     private Button btnStartNew;
     @FXML
     private Text txtDisplay;
+    @FXML
+    private Button btnHost;
+    @FXML
+    private TextArea txtareaInfo;
+    @FXML
+    private Button btnClient;
+    @FXML
+    private Button btnSave;
+    @FXML
+    private Button btnLoad;
+    @FXML
+    private Button btnDisconnect;
+    @FXML
+    private Text txtPlayer1;
+    @FXML
+    private Text txtPlayer2;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        firstInit();
+        state = new GameState(6, "Player 1", "Player 2");
+
         setupGame();
         renderGame();
-    }
-
-    private void firstInit() {
-        if (Files.exists(Paths.get(Helper.FILENAME))) {
-            try {
-                state = Helper.readGameStateFromFile();
-            } catch (IOException ex) {
-                Logger.getLogger(GameController.class.getName()).log(
-                        Level.SEVERE, null, ex);
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText("Ne može se pročitati sadržaj datoteke!");
-                alert.showAndWait();
-            }
-        } else {
-            try {
-                Helper.createEmptyFile();
-                state = new GameState(6, "Player 1", "Player 2");
-            } catch (IOException ex) {
-                Logger.getLogger(GameController.class.getName()).log(
-                        Level.SEVERE, null, ex);
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText("Ne može se kreirati prazna datoteka!");
-                alert.showAndWait();
-            }
-        }
+        gameGrid.setDisable(true);
     }
 
     private void setupGame() {
@@ -82,12 +83,18 @@ public class GameController implements Initializable {
         if (state.getWinner()) {
             state.setWinner(false);
             state.resetInitialGrid();
-            saveCurrentState();
+            if (state.currentPlayer == state.getPlayer1()) {
+                state.setCurrentPlayer(state.getPlayer2());
+            } else {
+                state.setCurrentPlayer(state.getPlayer1());
+            }
             renderGame();
         }
     }
 
     private void renderGame() {
+        txtDisplay.setText("Next turn: " + state.getCurrentPlayer().getName());
+
         for (final Node node : gameGrid.getChildren()) {
             Circle c;
             if (node instanceof Circle) {
@@ -125,7 +132,7 @@ public class GameController implements Initializable {
     }
 
     @FXML
-    private void onNextTurn(MouseEvent e) {
+    private void onNextTurn(MouseEvent e) throws InterruptedException {
         Node source = e.getPickResult().getIntersectedNode();
         if (!(source instanceof Circle)) {
             return;
@@ -146,7 +153,7 @@ public class GameController implements Initializable {
         txtDisplay.setText("Next turn: " + state.getCurrentPlayer().getName());
     }
 
-    private void addNextToGrid(int nextPlayer, int rowIndex, int colIndex) {
+    private void addNextToGrid(int nextPlayer, int rowIndex, int colIndex) throws InterruptedException {
         int lastAddedInColumn = -1;
         for (int i = 0; i < state.getSize(); i++) {
             if (state.getGridFieldValue(state.getSize() - 1, colIndex) == 0) {
@@ -166,11 +173,28 @@ public class GameController implements Initializable {
         calculateGame(lastAddedInColumn, colIndex, nextPlayer);
         if (state.getWinner()) {
             setWinner();
+            txtareaInfo.appendText("Pobjednik je " + state.currentPlayer.getName());
         }
 
         changePlayer();
-        saveCurrentState();
         renderGame();
+        if (sock != null) {
+            try {
+
+                txtareaInfo.appendText("INFO: salje update statea");
+                os.writeObject(state);
+                os.flush();
+
+                gameGrid.setDisable(true);
+                if (state.getWinner()) {
+                    btnStartNew.setDisable(true);
+                    txtareaInfo.appendText("Pobjednik je " + state.currentPlayer.getName());
+                }
+
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+            }
+        }
     }
 
     private void calculateGame(int row, int col, int playerCheck) {
@@ -219,6 +243,15 @@ public class GameController implements Initializable {
     @FXML
     private void onStartNewGame(MouseEvent event) {
         setupGame();
+        if (sock != null) {
+            try {
+                os.writeObject(state);
+                os.flush();
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+            }
+        }
+        gameGrid.setDisable(true);
     }
 
     private void saveCurrentState() {
@@ -232,4 +265,177 @@ public class GameController implements Initializable {
         }
     }
 
+    @FXML
+    private void onHostCreateClick(MouseEvent event) throws IOException {
+        Host host = new Host();
+        host.start();
+        gameGrid.setDisable(false);
+        txtPlayer1.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
+    }
+
+    @FXML
+    private void onClientConnect(MouseEvent event) {
+        Client client = new Client();
+        client.start();
+        txtPlayer2.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
+    }
+
+    @FXML
+    private void onButtonSaveClick(MouseEvent event) {
+        try {
+            Helper.saveToFile(state);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Došlo je do pogreške u radu s datotekom!");
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void onButtonLoadClick(MouseEvent event) {
+        if (Files.exists(Paths.get(Helper.FILENAME))) {
+            try {
+                state = Helper.readGameStateFromFile();
+                if (sock != null) {
+                    os.writeObject(state);
+                    os.flush();
+                    gameGrid.setDisable(true);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(GameController.class.getName()).log(
+                        Level.SEVERE, null, ex);
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Ne može se pročitati sadržaj datoteke!");
+                alert.showAndWait();
+            }
+        } else {
+            try {
+                Helper.createEmptyFile();
+                state = new GameState(6, "Player 1", "Player 2");
+            } catch (IOException ex) {
+                Logger.getLogger(GameController.class.getName()).log(
+                        Level.SEVERE, null, ex);
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Ne može se kreirati prazna datoteka!");
+                alert.showAndWait();
+            }
+        }
+        renderGame();
+    }
+
+    @FXML
+    private void onButtonDisconnectClick(MouseEvent event
+    ) {
+        try {
+            if (os != null && sock != null) {
+                os.close();
+                sock.close();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.exit(0);
+    }
+
+    public class Host extends Thread {
+
+        public ServerSocket serverSocket;
+
+        private Host() throws IOException {
+            serverSocket = new ServerSocket(8089);
+            sock = serverSocket.accept();
+            os = new ObjectOutputStream(sock.getOutputStream());
+            txtareaInfo.appendText("Server pokrenut\n");
+        }
+
+        public void run() {
+            try {
+                ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+                GameState temp;
+                while (true) {
+                    temp = (GameState) in.readObject();
+                    gameGrid.setDisable(false);
+
+                    txtareaInfo.appendText("Dobio objekt sa klijenta\n");
+                    state = (GameState) temp;
+                    txtareaInfo.appendText("Host Player : \n" + state.currentPlayer.getName());
+                    txtareaInfo.appendText("State na hostu updatean\n");
+                    renderGame();
+                    if (state.getWinner()) {
+                        setWinner();
+                        txtareaInfo.appendText("Pobjednik je " + state.currentPlayer.getName());
+                        txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
+
+                    }
+
+                }
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+
+            } catch (ClassNotFoundException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+            } finally {
+                close(sock, serverSocket);
+            }
+        }
+
+        private void close(Socket clientSocket, ServerSocket serverSocket) {
+            try {
+                clientSocket.close();
+                serverSocket.close();
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Server se zatvara: " + ex.toString());
+            }
+        }
+
+    }
+
+    public class Client extends Thread {
+
+        public void run() {
+            try {
+                sock = new Socket("localhost", 8089);
+                os = new ObjectOutputStream(sock.getOutputStream());
+
+                ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+                GameState temp;
+
+                while (true) {
+                    temp = (GameState) in.readObject();
+                    gameGrid.setDisable(false);
+
+                    txtareaInfo.appendText("Dobio objekt sa hosta\n");
+                    state = (GameState) temp;
+                    txtareaInfo.appendText("Client Player : \n" + state.currentPlayer.getName());
+                    txtareaInfo.appendText("State na klijentu updatean\n");
+                    renderGame();
+                    if (state.getWinner()) {
+                        setWinner();
+                        txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
+
+                    }
+
+                }
+
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+
+            } catch (ClassNotFoundException ex) {
+                txtareaInfo.appendText("Greska: " + ex.toString());
+            } finally {
+                close(sock);
+            }
+
+        }
+
+        private void close(Socket clientSocket) {
+            try {
+                clientSocket.close();
+            } catch (IOException ex) {
+                txtareaInfo.appendText("Zatvara se: " + ex.toString());
+            }
+        }
+
+    }
 }

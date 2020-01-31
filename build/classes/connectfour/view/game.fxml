@@ -81,12 +81,12 @@
                 
             </children>
         </GridPane>
-        <Text layoutX="31.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 1" wrappingWidth="76.0">
+        <Text fx:id="txtPlayer1" layoutX="31.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 1" wrappingWidth="76.0">
             <font>
                 <Font size="18.0" />
             </font>
         </Text>
-        <Text layoutX="200.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 2" wrappingWidth="76.0">
+        <Text fx:id="txtPlayer2" layoutX="200.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player 2" wrappingWidth="76.0">
             <font>
                 <Font size="18.0" />
             </font>
@@ -97,10 +97,16 @@
          <font>
             <Font size="16.0" />
          </font></Button>
-      <Text fx:id="txtDisplay" layoutX="524.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="262.0">
+      <Text fx:id="txtDisplay" layoutX="255.0" layoutY="107.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="262.0">
          <font>
             <Font size="23.0" />
          </font>
       </Text>
+      <Button fx:id="btnHost" layoutX="565.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#onHostCreateClick" text="HOST" />
+      <Button fx:id="btnClient" layoutX="625.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#onClientConnect" text="CLIENT" />
+      <Button fx:id="btnDisconnect" layoutX="710.0" layoutY="14.0" mnemonicParsing="false" onMouseClicked="#onButtonDisconnectClick" prefHeight="48.0" prefWidth="76.0" text="Exit" />
+      <TextArea fx:id="txtareaInfo" layoutX="565.0" layoutY="75.0" prefHeight="70.0" prefWidth="222.0" />
+      <Button fx:id="btnSave" layoutX="365.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#onButtonSaveClick" text="Save" />
+      <Button fx:id="btnLoad" layoutX="418.0" layoutY="31.0" mnemonicParsing="false" onMouseClicked="#onButtonLoadClick" text="Load" />
     </children>
 </AnchorPane>
