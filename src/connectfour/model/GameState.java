@@ -13,12 +13,13 @@ import java.io.Serializable;
  */
 public class GameState implements Serializable {
 
-    private  int _size;
+    private int _size;
     public int[][] _gridFields;
-    private  Player _player1;
-    private  Player _player2;
+    private Player _player1;
+    private Player _player2;
     public Player currentPlayer;
     public Boolean winner;
+    public Boolean recording;
 
     public GameState(int size, String player1, String player2) {
         this._size = size;
@@ -27,6 +28,7 @@ public class GameState implements Serializable {
         this._player2 = new Player(2, player2);
         this.currentPlayer = this._player1;
         this.winner = false;
+        this.recording = false;
         resetInitialGrid();
     }
 
@@ -68,6 +70,14 @@ public class GameState implements Serializable {
 
     public void setWinner(Boolean winner) {
         this.winner = winner;
+    }
+
+    public Boolean getRecording() {
+        return recording;
+    }
+
+    public void setRecording(Boolean recording) {
+        this.recording = recording;
     }
 
     public void resetInitialGrid() {

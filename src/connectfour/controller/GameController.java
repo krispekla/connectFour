@@ -9,6 +9,7 @@ import connectfour.model.ChatService;
 import connectfour.model.GameState;
 import connectfour.model.IChatService;
 import connectfour.utils.Helper;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,9 +24,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -39,6 +42,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
 
 /**
  * FXML Controller class
@@ -81,6 +87,10 @@ public class GameController implements Initializable {
     private TextField txtInputChat;
     @FXML
     private Button btnChatSend;
+    @FXML
+    private Button btnRecord;
+    @FXML
+    private Button btnReplay;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -400,6 +410,41 @@ public class GameController implements Initializable {
             }
         }
         txtInputChat.setText("");
+    }
+
+    @FXML
+    private void onButtonRecordClick(MouseEvent event) {
+        state.recording = !state.recording;
+        toggleRecordButton();
+    }
+
+    @FXML
+    private void onButtonReplayClick(MouseEvent event) {
+        replayLastGame();
+    }
+
+    private void toggleRecordButton() {
+        if (state.getRecording()) {
+            btnRecord.setText("Stop");
+        } else {
+            btnRecord.setText("Record");
+        }
+    }
+
+    private void replayLastGame() {
+//        List<GameState> stateList = Helper.readXMLGameStates();
+//            for (int i = 0; i < stateList.size(); i++) {
+//        Platform.runLater(() -> {
+//                try {
+//                    state = stateList.get(i);
+//                    renderGame();
+//
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//        });
+//            }
     }
 
     public class Host extends Thread {

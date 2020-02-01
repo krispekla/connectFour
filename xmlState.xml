@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gameStates>
+  <state>
+    <winner>false</winner>
+    <recording>false</recording>
+    <player1>
+      <name>Player 1</name>
+      <number>1</number>
+    </player1>
+    <player2>
+      <name>Player 2</name>
+      <number>2</number>
+    </player2>
+    <grid>
+      <node col="0" row="0">0</node>
+      <node col="1" row="0">0</node>
+      <node col="2" row="0">0</node>
+      <node col="3" row="0">0</node>
+      <node col="4" row="0">0</node>
+      <node col="5" row="0">0</node>
+      <node col="0" row="1">0</node>
+      <node col="1" row="1">0</node>
+      <node col="2" row="1">0</node>
+      <node col="3" row="1">0</node>
+      <node col="4" row="1">0</node>
+      <node col="5" row="1">2</node>
+      <node col="0" row="2">0</node>
+      <node col="1" row="2">0</node>
+      <node col="2" row="2">0</node>
+      <node col="3" row="2">0</node>
+      <node col="4" row="2">0</node>
+      <node col="5" row="2">2</node>
+      <node col="0" row="3">0</node>
+      <node col="1" row="3">0</node>
+      <node col="2" row="3">0</node>
+      <node col="3" row="3">0</node>
+      <node col="4" row="3">0</node>
+      <node col="5" row="3">0</node>
+      <node col="0" row="4">0</node>
+      <node col="1" row="4">0</node>
+      <node col="2" row="4">0</node>
+      <node col="3" row="4">0</node>
+      <node col="4" row="4">1</node>
+      <node col="5" row="4">1</node>
+      <node col="0" row="5">0</node>
+      <node col="1" row="5">0</node>
+      <node col="2" row="5">0</node>
+      <node col="3" row="5">0</node>
+      <node col="4" row="5">0</node>
+      <node col="5" row="5">1</node>
+    </grid>
+    <currentPlayer>2</currentPlayer>
+  </state>
+  <state>
+    <winner>false</winner>
+    <recording>false</recording>
+    <player1>
+      <name>Player 1</name>
+      <number>1</number>
+    </player1>
+    <player2>
+      <name>Player 2</name>
+      <number>2</number>
+    </player2>
+    <grid>
+      <node col="0" row="0">0</node>
+      <node col="1" row="0">0</node>
+      <node col="2" row="0">0</node>
+      <node col="3" row="0">0</node>
+      <node col="4" row="0">0</node>
+      <node col="5" row="0">0</node>
+      <node col="0" row="1">0</node>
+      <node col="1" row="1">0</node>
+      <node col="2" row="1">0</node>
+      <node col="3" row="1">0</node>
+      <node col="4" row="1">0</node>
+      <node col="5" row="1">0</node>
+      <node col="0" row="2">0</node>
+      <node col="1" row="2">0</node>
+      <node col="2" row="2">0</node>
+      <node col="3" row="2">0</node>
+      <node col="4" row="2">0</node>
+      <node col="5" row="2">0</node>
+      <node col="0" row="3">0</node>
+      <node col="1" row="3">0</node>
+      <node col="2" row="3">0</node>
+      <node col="3" row="3">0</node>
+      <node col="4" row="3">0</node>
+      <node col="5" row="3">0</node>
+      <node col="0" row="4">0</node>
+      <node col="1" row="4">0</node>
+      <node col="2" row="4">0</node>
+      <node col="3" row="4">2</node>
+      <node col="4" row="4">0</node>
+      <node col="5" row="4">0</node>
+      <node col="0" row="5">0</node>
+      <node col="1" row="5">0</node>
+      <node col="2" row="5">0</node>
+      <node col="3" row="5">2</node>
+      <node col="4" row="5">1</node>
+      <node col="5" row="5">1</node>
+    </grid>
+    <currentPlayer>2</currentPlayer>
+  </state>
+  <state>
+    <winner>false</winner>
+    <recording>false</recording>
+    <player1>
+      <name>Player 1</name>
+      <number>1</number>
+    </player1>
+    <player2>
+      <name>Player 2</name>
+      <number>2</number>
+    </player2>
+    <grid>
+      <node col="0" row="0">0</node>
+      <node col="1" row="0">0</node>
+      <node col="2" row="0">0</node>
+      <node col="3" row="0">0</node>
+      <node col="4" row="0">0</node>
+      <node col="5" row="0">0</node>
+      <node col="0" row="1">0</node>
+      <node col="1" row="1">0</node>
+      <node col="2" row="1">0</node>
+      <node col="3" row="1">0</node>
+      <node col="4" row="1">0</node>
+      <node col="5" row="1">0</node>
+      <node col="0" row="2">0</node>
+      <node col="1" row="2">0</node>
+      <node col="2" row="2">0</node>
+      <node col="3" row="2">0</node>
+      <node col="4" row="2">0</node>
+      <node col="5" row="2">1</node>
+      <node col="0" row="3">0</node>
+      <node col="1" row="3">0</node>
+      <node col="2" row="3">0</node>
+      <node col="3" row="3">0</node>
+      <node col="4" row="3">2</node>
+      <node col="5" row="3">2</node>
+      <node col="0" row="4">0</node>
+      <node col="1" row="4">0</node>
+      <node col="2" row="4">0</node>
+      <node col="3" row="4">0</node>
+      <node col="4" row="4">0</node>
+      <node col="5" row="4">1</node>
+      <node col="0" row="5">0</node>
+      <node col="1" row="5">0</node>
+      <node col="2" row="5">0</node>
+      <node col="3" row="5">0</node>
+      <node col="4" row="5">0</node>
+      <node col="5" row="5">1</node>
+    </grid>
+    <currentPlayer>2</currentPlayer>
+  </state>
+</gameStates>
