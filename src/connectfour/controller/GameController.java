@@ -45,6 +45,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
+import javax.xml.transform.TransformerException;
 
 /**
  * FXML Controller class
@@ -91,6 +92,8 @@ public class GameController implements Initializable {
     private Button btnRecord;
     @FXML
     private Button btnReplay;
+    @FXML
+    private Button btnReflection;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -169,6 +172,13 @@ public class GameController implements Initializable {
         int rowIndex = GridPane.getRowIndex(source);
 
         addNextToGrid(state.getCurrentPlayer().getPlayerNumber(), rowIndex, colIndex);
+        if (state.recording) {
+            try {
+                Helper.saveXMLofGameState(state);
+            } catch (IOException | TransformerException ex) {
+                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     private void changePlayer() {
@@ -414,6 +424,10 @@ public class GameController implements Initializable {
 
     @FXML
     private void onButtonRecordClick(MouseEvent event) {
+        if (!state.recording) {
+            Helper.resetXMLGameState();
+
+        }
         state.recording = !state.recording;
         toggleRecordButton();
     }
@@ -432,19 +446,15 @@ public class GameController implements Initializable {
     }
 
     private void replayLastGame() {
-//        List<GameState> stateList = Helper.readXMLGameStates();
-//            for (int i = 0; i < stateList.size(); i++) {
-//        Platform.runLater(() -> {
-//                try {
-//                    state = stateList.get(i);
-//                    renderGame();
-//
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//        });
-//            }
+        Replay rep = new Replay();
+        rep.start();
+
+    }
+
+    @FXML
+    private void onButtonReflectionClick(MouseEvent event) {
+        Class klasa = state.currentPlayer.getClass();
+        txtareaInfo.appendText("\nIme klase: " + klasa.getName() + "\n");
     }
 
     public class Host extends Thread {
@@ -657,5 +667,23 @@ public class GameController implements Initializable {
             }
         }
 
+    }
+
+    public class Replay extends Thread {
+
+        public void run() {
+            List<GameState> stateList = Helper.readXMLGameStates();
+            for (int i = 0; i < stateList.size(); i++) {
+                try {
+                    state = stateList.get(i);
+                    renderGame();
+
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        }
     }
 }

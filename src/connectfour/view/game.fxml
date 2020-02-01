@@ -113,5 +113,6 @@
       <Button fx:id="btnChatSend" layoutX="716.0" layoutY="395.0" mnemonicParsing="false" onMouseClicked="#onButtonChatSendClick" prefHeight="25.0" prefWidth="70.0" text="Send" />
       <Button fx:id="btnRecord" layoutX="698.0" layoutY="453.0" mnemonicParsing="false" onMouseClicked="#onButtonRecordClick" prefHeight="25.0" prefWidth="70.0" text="Record" />
       <Button fx:id="btnReplay" layoutX="617.0" layoutY="453.0" mnemonicParsing="false" onMouseClicked="#onButtonReplayClick" prefHeight="25.0" prefWidth="60.0" text="Replay" />
+      <Button fx:id="btnReflection" layoutX="565.0" layoutY="159.0" mnemonicParsing="false" onMouseClicked="#onButtonReflectionClick" prefHeight="27.0" prefWidth="222.0" text="Primjer refleksija" />
     </children>
 </AnchorPane>

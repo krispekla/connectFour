@@ -73,7 +73,7 @@ public class Helper {
         file.createNewFile();
     }
 
-    public static void createAndSaveXMLofGameState(GameState gs) throws IOException, TransformerException {
+    public static void saveXMLofGameState(GameState gs) throws IOException, TransformerException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -154,7 +154,7 @@ public class Helper {
                 Element temp = doc.createElement("node");
                 temp.setAttribute("row", Integer.toString(i));
                 temp.setAttribute("col", Integer.toString(j));
-                temp.appendChild(doc.createTextNode(Integer.toString(st.getGridFieldValue(j, i))));
+                temp.appendChild(doc.createTextNode(Integer.toString(st.getGridFieldValue(i, j))));
                 gridFields.appendChild(temp);
             }
         }
@@ -214,5 +214,10 @@ public class Helper {
             Logger.getLogger(Helper.class.getName()).log(Level.SEVERE, null, ex);
         }
         return games;
+    }
+
+    public static void resetXMLGameState() {
+            File file = new File(XMLDOCUMENT);
+            file.delete();
     }
 }
