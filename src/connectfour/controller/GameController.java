@@ -7,9 +7,9 @@ package connectfour.controller;
 
 import connectfour.model.ChatService;
 import connectfour.model.GameState;
+import connectfour.model.IChatListener;
 import connectfour.model.IChatService;
 import connectfour.utils.Helper;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,7 +18,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -42,9 +41,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Window;
 import javax.xml.transform.TransformerException;
 
 /**
@@ -54,12 +50,13 @@ import javax.xml.transform.TransformerException;
  */
 public class GameController implements Initializable {
 
-    GameState state = new GameState(6, "Player 1", "Player 2");
-    ObjectOutputStream os;
-    ChatService chat;
-    ChatService server;
-
+    public GameState state = new GameState(6, "Player 1", "Player 2");
+    public ObjectOutputStream os;
+    public ChatService chat;
+    public ChatService server;
+    public Boolean isServer = false;
     private Socket sock;
+    private Registry registry;
     @FXML
     private GridPane gameGrid;
     @FXML
@@ -305,31 +302,25 @@ public class GameController implements Initializable {
 
     @FXML
     private void onHostCreateClick(MouseEvent event) throws IOException {
-        try {
-            Host host = new Host();
-            host.start();
-            gameGrid.setDisable(false);
-            txtPlayer1.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
-            ChatServer ch = new ChatServer();
-            ch.start();
-            txtAreaChat.appendText("Chat pokrenut\n");
-        } catch (NotBoundException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Host host = new Host();
+//        Host host = new Host(state, gameGrid, txtAreaChat, txtareaInfo);
+        host.setDaemon(true);
+        host.start();
+        isServer = true;
+        gameGrid.setDisable(false);
+        txtPlayer1.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
+
+        txtAreaChat.appendText("Chat pokrenut\n");
     }
 
     @FXML
     private void onClientConnect(MouseEvent event) {
-        try {
-            Client client = new Client();
-            client.start();
-            txtPlayer2.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
-            ChatClient cl = new ChatClient();
-            cl.start();
-            txtAreaChat.appendText("Chat pokrenut\n");
-        } catch (NotBoundException ex) {
-            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        Client client = new Client(state, gameGrid, txtAreaChat, txtareaInfo);
+        Client client = new Client();
+        client.setDaemon(true);
+        client.start();
+        txtPlayer2.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
+        txtAreaChat.appendText("Chat pokrenut\n");
 
     }
 
@@ -394,32 +385,28 @@ public class GameController implements Initializable {
     @FXML
     private void onButtonChatSendClick(MouseEvent event) {
 
-        if (txtInputChat.getText().length() > 0 && chat != null) {
-            try {
-                chat.setName(txtInputChat.getText());
-                Registry registry = LocateRegistry.getRegistry();
-
-//                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(chat, 0);
-                registry.rebind("client", chat);
-                txtAreaChat.appendText("Player 2:" + txtInputChat.getText() + "\n");
-
-            } catch (RemoteException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            if (registry == null) {
+                registry = LocateRegistry.getRegistry();
             }
-        } else if (txtInputChat.getText().length() > 0) {
-            try {
-                chat = new ChatService(txtInputChat.getText());
-                Registry registry = LocateRegistry.getRegistry(1099);
 
-                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(chat, 0);
-                registry.rebind("server", stub);
-                txtAreaChat.appendText("Player 1:" + txtInputChat.getText() + "\n");
-
-            } catch (RemoteException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+            if (isServer && !txtInputChat.getText().isEmpty()) {
+                registry = LocateRegistry.getRegistry();
+                IChatService chat = (IChatService) registry.lookup("client");
+                chat.send("Player 1: " + txtInputChat.getText());
+                txtAreaChat.appendText("Player 1: " + txtInputChat.getText() + "\n");
+            } else if (!txtInputChat.getText().isEmpty()) {
+                registry = LocateRegistry.getRegistry();
+                IChatService chat = (IChatService) registry.lookup("server");
+                chat.send("Player 2: " + txtInputChat.getText());
+                txtAreaChat.appendText("Player 2: " + txtInputChat.getText() + "\n");
             }
+            txtInputChat.setText("");
+
+        } catch (RemoteException | NotBoundException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        txtInputChat.setText("");
+
     }
 
     @FXML
@@ -457,45 +444,65 @@ public class GameController implements Initializable {
         txtareaInfo.appendText("\nIme klase: " + klasa.getName() + "\n");
     }
 
-    public class Host extends Thread {
+    public class Host extends Thread implements IChatListener {
 
-        public ServerSocket serverSocket;
-
-        private Host() throws IOException {
-            serverSocket = new ServerSocket(8089);
-            sock = serverSocket.accept();
-            os = new ObjectOutputStream(sock.getOutputStream());
-            txtareaInfo.appendText("Server pokrenut\n");
-        }
+        private ServerSocket serverSocket;
+//        private IChatService chat;
+//        private GameState state;
+//        private GridPane gameGrid;
+//        private TextArea txtAreaChat;
+//        private TextArea txtareaInfo;
+//
+//        private Host(GameState state, GridPane gameGrid, TextArea txtAreaChat, TextArea txtareaInfo) {
+//            this.state = state;
+//            this.gameGrid = gameGrid;
+//            this.txtAreaChat = txtAreaChat;
+//            this.txtareaInfo = txtareaInfo;
+//        }
 
         public void run() {
             try {
-                ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-                GameState temp;
-                while (true) {
-                    temp = (GameState) in.readObject();
-                    gameGrid.setDisable(false);
+                serverSocket = new ServerSocket(8089);
+                sock = serverSocket.accept();
+                os = new ObjectOutputStream(sock.getOutputStream());
+                txtareaInfo.appendText("Server pokrenut\n");
 
-                    txtareaInfo.appendText("Dobio objekt sa klijenta\n");
-                    state = (GameState) temp;
-                    txtareaInfo.appendText("Host Player : \n" + state.currentPlayer.getName());
-                    txtareaInfo.appendText("State na hostu updatean\n");
-                    renderGame();
-                    if (state.getWinner()) {
-                        setWinner();
-                        txtareaInfo.appendText("Pobjednik je " + state.currentPlayer.getName());
-                        txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
+                ChatService serverChat = new ChatService("Player 1");
+                serverChat.addListener(this);
+                Registry registry = LocateRegistry.createRegistry(1099);
+
+                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(serverChat, 0);
+                registry.rebind("server", stub);
+
+                try {
+                    ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+                    GameState temp;
+                    while (true) {
+                        temp = (GameState) in.readObject();
+                        gameGrid.setDisable(false);
+
+                        txtareaInfo.appendText("Dobio objekt sa klijenta\n");
+                        state = (GameState) temp;
+                        txtareaInfo.appendText("Host Player : \n" + state.currentPlayer.getName());
+                        txtareaInfo.appendText("State na hostu updatean\n");
+                        renderGame();
+                        if (state.getWinner()) {
+                            setWinner();
+                            txtareaInfo.appendText("Pobjednik je " + state.currentPlayer.getName());
+                            txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
+
+                        }
 
                     }
+                } catch (IOException | ClassNotFoundException ex) {
+                    txtareaInfo.appendText("Greska: " + ex.toString());
 
+                } finally {
+                    close(sock, serverSocket);
                 }
             } catch (IOException ex) {
-                txtareaInfo.appendText("Greska: " + ex.toString());
+                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
 
-            } catch (ClassNotFoundException ex) {
-                txtareaInfo.appendText("Greska: " + ex.toString());
-            } finally {
-                close(sock, serverSocket);
             }
         }
 
@@ -508,9 +515,27 @@ public class GameController implements Initializable {
             }
         }
 
+        @Override
+        public void onMesssageChange(String message) {
+
+            txtAreaChat.appendText(message + "\n");
+        }
+
     }
 
-    public class Client extends Thread {
+    public class Client extends Thread implements IChatListener {
+
+//        private GameState state;
+//        private GridPane gameGrid;
+//        private TextArea txtAreaChat;
+//        private TextArea txtareaInfo;
+//
+//        private Client(GameState state, GridPane gameGrid, TextArea txtAreaChat, TextArea txtareaInfo) {
+//            this.state = state;
+//            this.gameGrid = gameGrid;
+//            this.txtAreaChat = txtAreaChat;
+//            this.txtareaInfo = txtareaInfo;
+//        }
 
         public void run() {
             try {
@@ -520,6 +545,13 @@ public class GameController implements Initializable {
                 ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
                 GameState temp;
 
+                ChatService clientChat = new ChatService("Player 2");
+                clientChat.addListener(this);
+                Registry registry = LocateRegistry.getRegistry();
+
+                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(clientChat, 0);
+                registry.rebind("client", stub);
+
                 while (true) {
                     temp = (GameState) in.readObject();
                     gameGrid.setDisable(false);
@@ -528,7 +560,14 @@ public class GameController implements Initializable {
                     state = (GameState) temp;
                     txtareaInfo.appendText("Client Player : \n" + state.currentPlayer.getName());
                     txtareaInfo.appendText("State na klijentu updatean\n");
-                    renderGame();
+                   
+//                    Platform.runLater(new Runnable() {
+//                        @Override
+//                        public void run() {
+                            renderGame();
+//                        }
+//                    });
+                            
                     if (state.getWinner()) {
                         setWinner();
                         txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
@@ -556,115 +595,9 @@ public class GameController implements Initializable {
             }
         }
 
-    }
-
-    public class ChatServer extends Thread {
-
-        public ChatServer() throws NotBoundException {
-
-        }
-
-        public void run() {
-            try {
-                server = new ChatService("");
-
-                Registry registry = LocateRegistry.createRegistry(1099);
-
-                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(server, 0);
-                registry.rebind("server", stub);
-
-                System.out.println("server ready, waiting for client...");
-
-                while (true) {
-                    IChatService client;
-                    try {
-                        client = (IChatService) registry.lookup("client");
-                        if (client != null && client.getName().length() > 0) {
-                            txtAreaChat.appendText("Player 2: " + client.getName() + "\n");
-                            cleanServerRegistry();
-                        }
-                    } catch (NotBoundException ex) {
-                        System.out.println("still no client...");
-                    } catch (AccessException ex) {
-                        Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    Thread.sleep(5000);
-                }
-            } catch (RemoteException | InterruptedException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
-
-        private void cleanServerRegistry() {
-            try {
-                chat = new ChatService("");
-                Registry registry = LocateRegistry.getRegistry();
-                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(chat, 0);
-
-                registry.rebind("client", stub);
-            } catch (RemoteException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-
-    public class ChatClient extends Thread {
-
-        public ChatClient() throws NotBoundException {
-
-        }
-
-        public void run() {
-            try {
-                chat = new ChatService("");
-
-                Registry registry = LocateRegistry.getRegistry();
-
-                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(chat, 0);
-                registry.rebind("client", stub);
-
-                System.out.println("client ready, searching for server...");
-
-                while (true) {
-                    IChatService server;
-                    try {
-                        server = (IChatService) registry.lookup("server");
-                        if (server != null && server.getName().length() > 0) {
-                            txtAreaChat.appendText("Player 1: " + server.getName() + "\n");
-                            cleanClientRegistry();
-                        }
-                    } catch (NotBoundException ex) {
-                        System.out.println("still no server...");
-                    } catch (AccessException ex) {
-                    }
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            } catch (RemoteException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
-
-        private void close() {
-
-        }
-
-        private void cleanClientRegistry() {
-            try {
-                chat = new ChatService("");
-                Registry registry = LocateRegistry.getRegistry(1099);
-
-                IChatService stub = (IChatService) UnicastRemoteObject.exportObject(chat, 0);
-                registry.rebind("server", stub);
-            } catch (RemoteException ex) {
-                Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        @Override
+        public void onMesssageChange(String message) {
+            txtAreaChat.appendText(message + "\n");
         }
 
     }

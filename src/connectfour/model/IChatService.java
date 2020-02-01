@@ -16,7 +16,5 @@ public interface IChatService extends Remote {
 
     String getName() throws RemoteException;
 
-    void setName(String name) throws RemoteException;
-
     void send(String message) throws RemoteException;
 }

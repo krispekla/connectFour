@@ -6,6 +6,8 @@
 package connectfour.model;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -14,9 +16,14 @@ import java.rmi.RemoteException;
 public class ChatService implements IChatService {
 
     private String name;
+    private List<IChatListener> listeners = new ArrayList<>();
 
     public ChatService(String name) throws RemoteException {
         this.name = name;
+    }
+
+    public void addListener(IChatListener listener) {
+        listeners.add(listener);
     }
 
     @Override
@@ -26,12 +33,8 @@ public class ChatService implements IChatService {
 
     @Override
     public void send(String message) throws RemoteException {
-        System.out.println(name + " received msg: " + message);
+        for (IChatListener listener : listeners) {
+            listener.onMesssageChange(message);
+        }
     }
-
-    @Override
-    public void setName(String name) throws RemoteException {
-        this.name = name;
-    }
-
 }
