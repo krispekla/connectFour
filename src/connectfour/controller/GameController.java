@@ -13,6 +13,9 @@ import connectfour.utils.Helper;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
@@ -27,7 +30,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -50,11 +52,11 @@ import javax.xml.transform.TransformerException;
  */
 public class GameController implements Initializable {
 
-    public GameState state = new GameState(6, "Player 1", "Player 2");
-    public ObjectOutputStream os;
-    public ChatService chat;
-    public ChatService server;
-    public Boolean isServer = false;
+    private GameState state = new GameState(6, "Player 1", "Player 2");
+    private ObjectOutputStream os;
+    private ChatService chat;
+    private ChatService server;
+    private Boolean isServer = false;
     private Socket sock;
     private Registry registry;
     @FXML
@@ -440,8 +442,44 @@ public class GameController implements Initializable {
 
     @FXML
     private void onButtonReflectionClick(MouseEvent event) {
-        Class klasa = state.currentPlayer.getClass();
-        txtareaInfo.appendText("\nIme klase: " + klasa.getName() + "\n");
+        try {
+            GameState gs = new GameState(6, "Pl1", "Pl2");
+            Class klasa = gs.getClass();
+            Constructor[] constructors = klasa.getConstructors();
+            Method[] methods = klasa.getMethods();
+            Field[] fields = klasa.getDeclaredFields();
+
+            txtareaInfo.appendText("\nIme klase: " + klasa.getName() + "\n");
+            txtareaInfo.appendText("\nPotpis konstruktora klase : " + "\n");
+
+            for (Constructor c : constructors) {
+                txtareaInfo.appendText(c.toGenericString() + "\n");
+            }
+
+            txtareaInfo.appendText("\nMetode klase su : " + "\n");
+
+            for (Method method : methods) {
+                txtareaInfo.appendText(method.getName() + "\n");
+            }
+
+            txtareaInfo.appendText("\nPolja klase su : " + "\n");
+
+            for (Field f : fields) {
+                txtareaInfo.appendText(f.getName() + "\n");
+            }
+
+            txtareaInfo.appendText("\nVelicina prije nego sto je izmjenjen : " + Integer.toString(gs.getSize()) + "\n");
+
+            Field imePlayera = klasa.getDeclaredField("_size");
+            imePlayera.setAccessible(true);
+            imePlayera.setInt(gs, 4);
+            txtareaInfo.appendText("\nVelicina nakon sto je izmjenjen : " + Integer.toString(gs.getSize()) + "\n");
+
+
+        } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ex) {
+            Logger.getLogger(GameController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     public class Host extends Thread implements IChatListener {
@@ -536,7 +574,6 @@ public class GameController implements Initializable {
 //            this.txtAreaChat = txtAreaChat;
 //            this.txtareaInfo = txtareaInfo;
 //        }
-
         public void run() {
             try {
                 sock = new Socket("localhost", 8089);
@@ -560,14 +597,14 @@ public class GameController implements Initializable {
                     state = (GameState) temp;
                     txtareaInfo.appendText("Client Player : \n" + state.currentPlayer.getName());
                     txtareaInfo.appendText("State na klijentu updatean\n");
-                   
+
 //                    Platform.runLater(new Runnable() {
 //                        @Override
 //                        public void run() {
-                            renderGame();
+                    renderGame();
 //                        }
 //                    });
-                            
+
                     if (state.getWinner()) {
                         setWinner();
                         txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
