@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package connectfour.controller;
 
 import connectfour.model.ChatService;
@@ -52,13 +48,12 @@ import javax.xml.transform.TransformerException;
  */
 public class GameController implements Initializable {
 
-    private GameState state = new GameState(6, "Player 1", "Player 2");
-    private ObjectOutputStream os;
-    private ChatService chat;
-    private ChatService server;
-    private Boolean isServer = false;
-    private Socket sock;
-    private Registry registry;
+    private static GameState state = new GameState(6, "Player 1", "Player 2");
+    private static ObjectOutputStream os;
+    private static Boolean isServer = false;
+    private static Socket sock;
+    private static Registry registry;
+    
     @FXML
     private GridPane gameGrid;
     @FXML
@@ -295,7 +290,6 @@ public class GameController implements Initializable {
         try {
             Helper.saveToFile(state);
         } catch (IOException ex) {
-            ex.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Došlo je do pogreške u radu s datotekom!");
             alert.showAndWait();
@@ -305,7 +299,6 @@ public class GameController implements Initializable {
     @FXML
     private void onHostCreateClick(MouseEvent event) throws IOException {
         Host host = new Host();
-//        Host host = new Host(state, gameGrid, txtAreaChat, txtareaInfo);
         host.setDaemon(true);
         host.start();
         isServer = true;
@@ -317,7 +310,6 @@ public class GameController implements Initializable {
 
     @FXML
     private void onClientConnect(MouseEvent event) {
-//        Client client = new Client(state, gameGrid, txtAreaChat, txtareaInfo);
         Client client = new Client();
         client.setDaemon(true);
         client.start();
@@ -331,7 +323,6 @@ public class GameController implements Initializable {
         try {
             Helper.saveToFile(state);
         } catch (IOException ex) {
-            ex.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Došlo je do pogreške u radu s datotekom!");
             alert.showAndWait();
@@ -483,21 +474,9 @@ public class GameController implements Initializable {
     }
 
     public class Host extends Thread implements IChatListener {
-
         private ServerSocket serverSocket;
-//        private IChatService chat;
-//        private GameState state;
-//        private GridPane gameGrid;
-//        private TextArea txtAreaChat;
-//        private TextArea txtareaInfo;
-//
-//        private Host(GameState state, GridPane gameGrid, TextArea txtAreaChat, TextArea txtareaInfo) {
-//            this.state = state;
-//            this.gameGrid = gameGrid;
-//            this.txtAreaChat = txtAreaChat;
-//            this.txtareaInfo = txtareaInfo;
-//        }
 
+        @Override
         public void run() {
             try {
                 serverSocket = new ServerSocket(8089);
@@ -563,17 +542,7 @@ public class GameController implements Initializable {
 
     public class Client extends Thread implements IChatListener {
 
-//        private GameState state;
-//        private GridPane gameGrid;
-//        private TextArea txtAreaChat;
-//        private TextArea txtareaInfo;
-//
-//        private Client(GameState state, GridPane gameGrid, TextArea txtAreaChat, TextArea txtareaInfo) {
-//            this.state = state;
-//            this.gameGrid = gameGrid;
-//            this.txtAreaChat = txtAreaChat;
-//            this.txtareaInfo = txtareaInfo;
-//        }
+        @Override
         public void run() {
             try {
                 sock = new Socket("localhost", 8089);
@@ -598,26 +567,17 @@ public class GameController implements Initializable {
                     txtareaInfo.appendText("Client Player : \n" + state.currentPlayer.getName());
                     txtareaInfo.appendText("State na klijentu updatean\n");
 
-//                    Platform.runLater(new Runnable() {
-//                        @Override
-//                        public void run() {
                     renderGame();
-//                        }
-//                    });
 
                     if (state.getWinner()) {
                         setWinner();
                         txtDisplay.setText("Winner is " + state.getCurrentPlayer().getName());
 
                     }
-
                 }
-
-            } catch (IOException ex) {
+            } catch (IOException | ClassNotFoundException ex) {
                 txtareaInfo.appendText("Greska: " + ex.toString());
 
-            } catch (ClassNotFoundException ex) {
-                txtareaInfo.appendText("Greska: " + ex.toString());
             } finally {
                 close(sock);
             }
@@ -641,6 +601,7 @@ public class GameController implements Initializable {
 
     public class Replay extends Thread {
 
+        @Override
         public void run() {
             List<GameState> stateList = Helper.readXMLGameStates();
             for (int i = 0; i < stateList.size(); i++) {
